@@ -1,4 +1,5 @@
 ﻿using EventProcessing.Core.CommandCreation;
+using EventProcessing.Core.DocumentationGenerator;
 using EventProcessing.Core.EventStore;
 using EventProcessing.Core.EventStore.ConcreteContexts;
 using EventProcessing.Core.FlowExecutors;
@@ -16,9 +17,13 @@ namespace WorkflowApp
         {
             //SimpleFlow simpleFlow = new SimpleFlow(new InMemoryEventStore());
             //simpleFlow.Start();
+            AttributeFlowReader flowReader = new AttributeFlowReader(typeof(GuessTheNumberFlow));
+            var flow = flowReader.GetFlatFlow();
 
             GuessTheNumberFlow guessTheNumber = new GuessTheNumberFlow(new InMemoryEventStore());
             guessTheNumber.Start();
+
+
         }
     }
 }
