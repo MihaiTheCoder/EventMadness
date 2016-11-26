@@ -13,7 +13,7 @@ namespace EventProcessing.Core.EventStore
 
         public FlowContext ParentContext { get; set; }
 
-        public abstract object Identifier { get; set; }        
+        public abstract object Identifier { get; }        
 
         private event EventHandler DisposedEvent;
         public event EventHandler Disposed
