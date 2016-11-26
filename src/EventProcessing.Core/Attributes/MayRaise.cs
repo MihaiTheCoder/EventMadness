@@ -3,7 +3,7 @@
 namespace EventProcessing.Core.Attributes
 {
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    sealed class MayRaiseAttribute : Attribute
+    public sealed class MayRaiseAttribute : Attribute
     {
         public MayRaiseAttribute(Type eventThatMayBeRaised)
         {

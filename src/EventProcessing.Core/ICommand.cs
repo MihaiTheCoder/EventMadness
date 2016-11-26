@@ -7,5 +7,6 @@ namespace EventProcessing.Core
 {
     public interface ICommand
     {
+        void Execute();
     }
 }

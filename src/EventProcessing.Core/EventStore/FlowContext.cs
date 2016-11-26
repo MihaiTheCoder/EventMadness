@@ -54,13 +54,12 @@ namespace EventProcessing.Core.EventStore
         {
             if (obj is FlowContext)
             {
-                Equals(Identifier, ((FlowContext)obj).Identifier);
+                return Equals(Identifier, ((FlowContext)obj).Identifier);
             }
             else
             {
-                Equals(Identifier, obj);
+                return Equals(Identifier, obj);
             }
-            return base.Equals(obj);
         }
 
         public override int GetHashCode()

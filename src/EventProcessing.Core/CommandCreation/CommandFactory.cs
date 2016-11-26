@@ -11,13 +11,11 @@ namespace EventProcessing.Core.CommandCreation
 {
     public class CommandFactory : ICommandFactory
     {
-        private IoCResolver iocResolver;
         private IEventStore eventStore;
         IDictionary<Type, Func<FlowContext, ICommand>> commandCreationDictionary;
 
-        public CommandFactory(IoCResolver iocResolver, IEventStore eventStore)
+        public CommandFactory(IEventStore eventStore)
         {
-            this.iocResolver = iocResolver;
             this.eventStore = eventStore;
             commandCreationDictionary = new Dictionary<Type, Func<FlowContext, ICommand>>();
         }
@@ -30,9 +28,19 @@ namespace EventProcessing.Core.CommandCreation
             return commandCreationDictionary[commandType].Invoke(context);
         }
 
-        public void RegisterCommand(Type commandClass, Func<FlowContext, ICommand> commandCreation)
+        public void RegisterCommand<TCommand>(Func<FlowContext, TCommand> commandCreation) where TCommand : ICommand
         {
-            commandCreationDictionary.Add(commandClass, commandCreation);
+            commandCreationDictionary.Add(typeof(TCommand), (context) => commandCreation(context));
+        }
+
+        public IList<ICommand> Get(FlowContext context, IList<Type> commands)
+        {
+            List<ICommand> commandInstances = new List<ICommand>();
+            foreach (var command in commands)
+            {
+                commandInstances.Add(Get(context, command));
+            }
+            return commandInstances;
         }
     }
 }

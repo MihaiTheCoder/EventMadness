@@ -11,14 +11,19 @@ namespace EventProcessing.Core.EventStore
     public class InMemoryEventStore : IEventStore
     {
         ConcurrentDictionary<FlowContext, ReplaySubject<FlowEvent>> flowEvents;
+        ReplaySubject<FlowEvent> allFlowEventsObservable;
 
         public InMemoryEventStore()
         {
             flowEvents = new ConcurrentDictionary<FlowContext, ReplaySubject<FlowEvent>>();
+            allFlowEventsObservable = new ReplaySubject<FlowEvent>();
         }
 
         public void AddEvent(FlowEvent flowEvent)
         {
+            if (flowEvent.ContextOfEvent == null)
+                throw new ArgumentException("context must be set on each event before raising it");
+
             flowEvents.AddOrUpdate(flowEvent.ContextOfEvent,
                 (context) => GetObservableWithElement(flowEvent),//if context does not exist create new observable
                 (context, obs) =>//If context exists, add event to context and return it
@@ -26,6 +31,8 @@ namespace EventProcessing.Core.EventStore
                     obs.OnNext(flowEvent);
                     return obs;
                 });
+
+            allFlowEventsObservable.OnNext(flowEvent);
         }
 
         public IList<FlowEvent> GetCurrentEvents(FlowContext context, Type flowEventType)
@@ -36,6 +43,11 @@ namespace EventProcessing.Core.EventStore
             events.Subscribe(e => eventList.Add(e));
             
             return eventList;           
+        }
+
+        public IEventRaiserFactory GetEventRaiserFactory()
+        {
+            return new EventRaiserFactory(this);
         }
 
         public FlowEvent GetLatestEvent(FlowContext context, Type flowEventType)
@@ -63,6 +75,11 @@ namespace EventProcessing.Core.EventStore
 
         }
 
+        public TEvent GetLatestEvent<TEvent>(FlowContext context) where TEvent : FlowEvent
+        {
+            return (TEvent)GetLatestEvent(context, typeof(TEvent));
+        }
+
         public IObservable<FlowEvent> Subscribe(FlowContext context, Type flowEventType)
         {
             ReplaySubject<FlowEvent> events;
@@ -74,6 +91,11 @@ namespace EventProcessing.Core.EventStore
             {
                 throw new ArgumentOutOfRangeException("Could not find context:" + context);
             }
+        }
+
+        public IObservable<FlowEvent> SubscribeToAllEvents()
+        {
+            return allFlowEventsObservable;
         }
 
         private ReplaySubject<FlowEvent> GetObservableWithElement(FlowEvent flowEvent)

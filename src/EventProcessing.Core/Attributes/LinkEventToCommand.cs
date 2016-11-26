@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace EventProcessing.Core.Attributes
 {
     [System.AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
-    sealed class LinkEventToCommandAttribute : Attribute
+    public sealed class LinkEventToCommandAttribute : Attribute
     {
         static Type flowEventType = typeof(FlowEvent);
         static Type commandInterface = typeof(ICommand);
