@@ -18,7 +18,7 @@ namespace EventProcessing.Core.Helpers
         {
             var objType = obj is Type ? (Type)obj : obj.GetType();
 
-            return interfaceToImplement.IsAssignableFrom(objType);
+            return interfaceToImplement.GetTypeInfo().IsAssignableFrom(objType);
         }
 
         private static bool IsSameTypeOrChildOf(Type t, Type objType)
