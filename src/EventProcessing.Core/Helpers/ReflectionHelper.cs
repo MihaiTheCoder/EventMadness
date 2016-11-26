@@ -14,6 +14,13 @@ namespace EventProcessing.Core.Helpers
             return IsSameTypeOrChildOf(t, objType);
         }
 
+        public static bool ImplementsInterface(this object obj, Type interfaceToImplement)
+        {
+            var objType = obj is Type ? (Type)obj : obj.GetType();
+
+            return interfaceToImplement.IsAssignableFrom(objType);
+        }
+
         private static bool IsSameTypeOrChildOf(Type t, Type objType)
         {
             return objType == t || objType.GetTypeInfo().IsSubclassOf(t);
