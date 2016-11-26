@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace EventProcessing.Core.FlowExecutors
 {
-    public class AnnotationsFlowExecutor : IFlowExecutor
+    public class AttributeBasedFlowExecutor : IFlowExecutor
     {
         IEventStore eventStore;
         Type flowClass;
         IDictionary<Type, List<Type>> eventToCommandMapping;
         ICommandFactory commandFactory;
-        public AnnotationsFlowExecutor(Type flowClass, IEventStore eventStore, ICommandFactory commandFactory)
+        public AttributeBasedFlowExecutor(Type flowClass, IEventStore eventStore, ICommandFactory commandFactory)
         {
             this.eventStore = eventStore;
             this.flowClass = flowClass;
