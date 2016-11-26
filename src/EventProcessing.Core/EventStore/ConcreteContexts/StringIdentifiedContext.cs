@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace EventProcessing.Core.EventStore.ConcreteContexts
 {
-    public class StringIdentifiedContext : FlowContext
+    public class StringContext : FlowContext
     {
         string identifier;
-        public StringIdentifiedContext(string identifier)
+        public StringContext(string identifier)
         {
             this.identifier = identifier;
         }

@@ -14,8 +14,11 @@ namespace WorkflowApp
     {
         public static void Main(string[] args)
         {
-            SimpleFlow simpleFlow = new SimpleFlow(new InMemoryEventStore());
-            simpleFlow.Start();            
+            //SimpleFlow simpleFlow = new SimpleFlow(new InMemoryEventStore());
+            //simpleFlow.Start();
+
+            GuessTheNumberFlow guessTheNumber = new GuessTheNumberFlow(new InMemoryEventStore());
+            guessTheNumber.Start();
         }
     }
 }

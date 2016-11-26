@@ -3,6 +3,7 @@ using EventProcessing.Core.Attributes;
 using EventProcessing.Core.EventStore;
 using EventProcessing.Core.EventStore.ConcreteContexts;
 using EventProcessing.Core.FlowExecutors;
+using EventProcessing.Core.StandardEvents;
 using System;
 
 namespace WorkflowApp.SimpleWorkflow
@@ -15,7 +16,7 @@ namespace WorkflowApp.SimpleWorkflow
         {
         }
 
-        private FlowEvent _initialEvent = new OnStart { ContextOfEvent = new StringIdentifiedContext("1") };
+        private FlowEvent _initialEvent = new OnStart(new StringContext("1"));
         public override FlowEvent InitialEvent { get { return _initialEvent; } }
 
         protected override void RegisterCommands()
@@ -25,8 +26,6 @@ namespace WorkflowApp.SimpleWorkflow
             new PrintGeneratedMessage(eventRaiserFactory.Get(context), Get<OnMessageGenerated>(context).GeneratedMessage));
         }
     }
-
-    public class OnStart : FlowEvent { }
 
     public class OnMessageGenerated : FlowEvent
     {

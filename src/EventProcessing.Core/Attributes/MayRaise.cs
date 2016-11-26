@@ -13,6 +13,7 @@ namespace EventProcessing.Core.Attributes
         public Type EventThatMayBeRaised { get; private set; }
 
         // This is a named argument
-        public string Condition { get; set; }        
+        public string Condition { get; set; }
+        public string ExtraMessage { get; set; }
     }
 }

@@ -43,5 +43,10 @@ namespace EventProcessing.Core.FlowExecutors
             return eventStore.GetLatestEvent<TEvent>(flowContext);
         }
 
+        protected int GetCount<TEvent>(FlowContext flowContext) where TEvent : FlowEvent
+        {
+            return eventStore.GetCurrentEvents<TEvent>(flowContext).Count;
+        }
+
     }
 }

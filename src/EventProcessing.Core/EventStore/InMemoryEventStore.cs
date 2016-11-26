@@ -118,5 +118,15 @@ namespace EventProcessing.Core.EventStore
                 replaySubject.Dispose();
             }
         }
+
+        public IObservable<TEvent> Subscribe<TEvent>(FlowContext context) where TEvent : FlowEvent
+        {
+            return Subscribe(context, typeof(TEvent)).Select(e => (TEvent)e);
+        }
+
+        public IList<TEvent> GetCurrentEvents<TEvent>(FlowContext context) where TEvent : FlowEvent
+        {
+            return GetCurrentEvents(context, typeof(TEvent)).Select(e => (TEvent)e).ToList();
+        }
     }
 }

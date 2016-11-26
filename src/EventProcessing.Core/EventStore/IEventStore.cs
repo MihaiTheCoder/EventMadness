@@ -12,9 +12,13 @@ namespace EventProcessing.Core.EventStore
 
         TEvent GetLatestEvent<TEvent>(FlowContext context) where TEvent : FlowEvent;
 
+        IObservable<TEvent> Subscribe<TEvent>(FlowContext context) where TEvent : FlowEvent;
+
         IObservable<FlowEvent> Subscribe(FlowContext context, Type flowEventType);
 
         IObservable<FlowEvent> SubscribeToAllEvents();
+
+        IList<TEvent> GetCurrentEvents<TEvent>(FlowContext context) where TEvent : FlowEvent;
 
         IList<FlowEvent> GetCurrentEvents(FlowContext context, Type flowEventType);
 
