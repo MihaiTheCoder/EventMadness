@@ -11,12 +11,12 @@ namespace EventProcessing.Core.EventStore
     public class InMemoryEventStore : IEventStore
     {
         ConcurrentDictionary<FlowContext, ReplaySubject<FlowEvent>> flowEvents;
-        ReplaySubject<FlowEvent> allFlowEventsObservable;
+        BehaviorSubject<FlowEvent> allFlowEventsObservable;
 
         public InMemoryEventStore()
         {
             flowEvents = new ConcurrentDictionary<FlowContext, ReplaySubject<FlowEvent>>();
-            allFlowEventsObservable = new ReplaySubject<FlowEvent>();
+            allFlowEventsObservable = new BehaviorSubject<FlowEvent>(null);
         }
 
         public void AddEvent(FlowEvent flowEvent)

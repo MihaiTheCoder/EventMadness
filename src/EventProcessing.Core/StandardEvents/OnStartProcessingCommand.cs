@@ -8,7 +8,7 @@ namespace EventProcessing.Core.StandardEvents
 {
     public class OnStartProcessingCommand : CommandProcessingEvent
     {
-        public OnStartProcessingCommand(FlowContext context,ICommand command) : base(context,command)
+        public OnStartProcessingCommand(FlowContext context, ICommand command) : base(context, command)
         {
             
         }

@@ -9,14 +9,14 @@ namespace EventProcessing.Core.FlowExecutors
 {
     public abstract class AttributeFlowTemplate
     {
-        protected ICommandFactory commandFactory;
+        protected ICommandRegister commandFactory;
         protected IEventRaiserFactory eventRaiserFactory;
         protected IEventStore eventStore;
         protected IFlowExecutor annFlowExecutor;
 
         public AttributeFlowTemplate(IEventStore eventStore)
         {
-            commandFactory = new CommandFactory(eventStore);
+            commandFactory = new CommandRegister(eventStore);
             eventRaiserFactory = eventStore.GetEventRaiserFactory();
             this.eventStore = eventStore;
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace EventProcessing.Core.CommandCreation
 {
-    public interface ICommandFactory
+    public interface ICommandRegister
     {
         void RegisterCommand<TCommand>(Func<FlowContext,TCommand> commandCreation) where TCommand : ICommand;
 

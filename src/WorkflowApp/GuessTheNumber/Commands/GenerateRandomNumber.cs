@@ -1,5 +1,6 @@
 ﻿using EventProcessing.Core;
 using EventProcessing.Core.Attributes;
+using EventProcessing.Core.Commands;
 using EventProcessing.Core.EventStore;
 using System;
 using WorkflowApp.GuessTheNumber.Events;
@@ -7,21 +8,18 @@ using WorkflowApp.GuessTheNumber.Events;
 namespace WorkflowApp.GuessTheNumber.Commands
 {
     [MayRaise(typeof(OnRandomNumberGenerated))]
-    public class GenerateRandomNumber : ICommand
+    public class GenerateRandomNumber : SingleEventCommand
     {
-        private IEventRaiser eventRaiser;
-
-        public GenerateRandomNumber(IEventRaiser eventRaiser)
+        public GenerateRandomNumber()
         {
-            this.eventRaiser = eventRaiser;
         }
 
-        public void Execute()
+        public override FlowEvent SingleReturnExecute()
         {
-            Random r = new Random(1);
+            Random r = new Random();
             int randomNumber = r.Next(100);
 
-            eventRaiser.RaiseEventInCurrentContext(new OnRandomNumberGenerated(randomNumber));
+            return new OnRandomNumberGenerated(randomNumber);
         }
     }
 }

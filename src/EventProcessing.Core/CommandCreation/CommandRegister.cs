@@ -9,12 +9,12 @@ using EventProcessing.Core.Helpers;
 
 namespace EventProcessing.Core.CommandCreation
 {
-    public class CommandFactory : ICommandFactory
+    public class CommandRegister : ICommandRegister
     {
         private IEventStore eventStore;
         IDictionary<Type, Func<FlowContext, ICommand>> commandCreationDictionary;
 
-        public CommandFactory(IEventStore eventStore)
+        public CommandRegister(IEventStore eventStore)
         {
             this.eventStore = eventStore;
             commandCreationDictionary = new Dictionary<Type, Func<FlowContext, ICommand>>();
