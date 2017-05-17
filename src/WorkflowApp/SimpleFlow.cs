@@ -9,8 +9,8 @@ using System;
 
 namespace WorkflowApp.SimpleWorkflow
 {
-    [LinkEventToCommand(typeof(OnStart), typeof(GenerateMessage))]
-    [LinkEventToCommand(typeof(OnMessageGenerated), typeof(PrintGeneratedMessage))]
+    [LinkEventToCommand(typeof(OnStart), typeof(GenerateMessage), actualStep: "Le start context")]
+    [LinkEventToCommand(typeof(OnMessageGenerated), typeof(PrintGeneratedMessage), sourceStep:"El ciupacapra")]
     public class SimpleFlow : AttributeFlowTemplate
     {
         public SimpleFlow(IEventStore eventStore) : base(eventStore)

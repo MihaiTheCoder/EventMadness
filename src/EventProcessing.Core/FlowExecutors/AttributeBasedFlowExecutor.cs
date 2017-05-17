@@ -29,19 +29,21 @@ namespace EventProcessing.Core.FlowExecutors
             if (flowEvent == null)
                 return;
 
-            IList<ICommand> commands = GetCommands(flowEvent);
+            IList<Tuple<string,ICommand>> commands = GetCommands(flowEvent);
             foreach (var command in commands)
             {
                 if (!(flowEvent is CommandProcessingEvent))
-                    eventStore.AddEvent(new OnStartProcessingCommand(flowEvent.ContextOfEvent, command));
+                    eventStore.AddEvent(new OnStartProcessingCommand(flowEvent.ContextOfEvent, command.Item2));
 
-                var events = command.Execute();
+                var events = command.Item2.Execute();
 
                 Action onComplete = () =>
                 {
                     if (!(flowEvent is CommandProcessingEvent))
-                        eventStore.AddEvent(new OnEndProcessingCommand(flowEvent.ContextOfEvent, command));
+                        eventStore.AddEvent(new OnEndProcessingCommand(flowEvent.ContextOfEvent, command.Item2));
                 };
+
+                string stepName = command.Item1;// This is needed to capture variable also, we should use command variable in this lambda
 
                 events.Subscribe(currentEvent =>
                 {
@@ -50,6 +52,9 @@ namespace EventProcessing.Core.FlowExecutors
 
                     if (currentEvent.ContextOfEvent == null)
                         currentEvent.ContextOfEvent = flowEvent.ContextOfEvent;
+
+                    if (currentEvent.StepName == null && stepName != null)
+                        currentEvent.StepName = stepName;
 
                     eventStore.AddEvent(currentEvent);
                 }, ex => Console.WriteLine(ex), onComplete);
@@ -67,16 +72,16 @@ namespace EventProcessing.Core.FlowExecutors
             eventStore.AddEvent(initialEvent);
         }
 
-        private IList<ICommand> GetCommands(FlowEvent flowEvent)
+        private IList<Tuple<string, ICommand>> GetCommands(FlowEvent flowEvent)
         {
             var eventType = flowEvent.GetType();
             if (eventToCommandMapping.ContainsKey(eventType))
             {
-                return commandFactory.Get(flowEvent.ContextOfEvent, eventToCommandMapping[eventType]);
+                return commandFactory.Get(flowEvent.ContextOfEvent, eventToCommandMapping[eventType], flowEvent.StepName);
             }
             else
             {
-                return new List<ICommand>();
+                return new List<Tuple<string, ICommand>>();
             }
         }
 

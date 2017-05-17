@@ -6,10 +6,10 @@ namespace EventProcessing.Core.CommandCreation
 {
     public interface ICommandRegister
     {
-        void RegisterCommand<TCommand>(Func<FlowContext,TCommand> commandCreation) where TCommand : ICommand;
+        void RegisterCommand<TCommand>(Func<FlowContext,TCommand> commandCreation, string stepName = "") where TCommand : ICommand;
 
-        ICommand Get(FlowContext context, Type commandType);
+        IList<Tuple<string, ICommand>> Get(FlowContext context, Type commandType, string stepName);
 
-        IList<ICommand> Get(FlowContext context, IList<Type> commands);
+        IList<Tuple<string, ICommand>> Get(FlowContext context, IList<Type> commands, string stepName);
     }
 }

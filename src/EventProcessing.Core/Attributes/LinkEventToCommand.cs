@@ -12,7 +12,9 @@ namespace EventProcessing.Core.Attributes
     {
         static Type flowEventType = typeof(FlowEvent);
         static Type commandInterface = typeof(ICommand);
-        public LinkEventToCommandAttribute(Type flowEvent, Type command)
+        string sourceStep;
+        string actualStep;
+        public LinkEventToCommandAttribute(Type flowEvent, Type command, string sourceStep = null, string actualStep = null)
         {
             FlowEvent = flowEvent;
             Command = command;
@@ -22,6 +24,8 @@ namespace EventProcessing.Core.Attributes
 
             if (!Command.ImplementsInterface(commandInterface))
                 throw new ArgumentException(string.Format("Class {0} must implement {1}", command.FullName, commandInterface.FullName));
+            this.sourceStep = sourceStep;
+            this.actualStep = actualStep;
         }
 
         public Type FlowEvent { get; private set; }
