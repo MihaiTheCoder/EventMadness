@@ -15,10 +15,10 @@ namespace WorkflowApp
     {
         public static void Main(string[] args)
         {
-            //SimpleFlow simpleFlow = new SimpleFlow(new InMemoryEventStore());
-            //simpleFlow.Start();
-            AttributeFlowReader flowReader = new AttributeFlowReader(typeof(GuessTheNumberFlow));
-            var flow = flowReader.GetFlatFlow();
+            SimpleFlow simpleFlow = new SimpleFlow(new InMemoryEventStore());
+            simpleFlow.Start();
+            //AttributeFlowReader flowReader = new AttributeFlowReader(typeof(GuessTheNumberFlow));
+           // var flow = flowReader.GetFlatFlow();
 
             GuessTheNumberFlow guessTheNumber = new GuessTheNumberFlow(new InMemoryEventStore());
             guessTheNumber.Start();

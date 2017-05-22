@@ -6,6 +6,7 @@ using EventProcessing.Core;
 using EventProcessing.Core.EventStore;
 using System.Reflection;
 using EventProcessing.Core.Helpers;
+using EventProcessing.Core.Attributes;
 
 namespace EventProcessing.Core.CommandCreation
 {
@@ -19,26 +20,7 @@ namespace EventProcessing.Core.CommandCreation
         {
             this.eventStore = eventStore;
             commandCreationDictionary = new Dictionary<Type, Dictionary<string, Func<FlowContext, ICommand>>>();
-        }
-
-        public IList<Tuple<string, ICommand>> Get(FlowContext context, Type commandType, string stepName)
-        {
-            if (!commandCreationDictionary.ContainsKey(commandType))
-                throw new ArgumentException("Command:{0} not registered", commandType.FullName);
-
-            var commandsOfType = commandCreationDictionary[commandType];
-
-            List<Tuple<string, ICommand>> commands = new List<Tuple<string, ICommand>>();
-            if (commandsOfType.ContainsKey(stepName))
-            {
-                commands.Add(new Tuple<string, ICommand>(stepName, commandsOfType[stepName].Invoke(context)));
-            }
-            if (stepName != defaultStepName && commandsOfType.ContainsKey(defaultStepName))
-            {
-                commands.Add(new Tuple<string, ICommand>(defaultStepName, commandsOfType[defaultStepName].Invoke(context)));
-            }
-            return commands;
-        }
+        }        
 
         public void RegisterCommand<TCommand>(Func<FlowContext, TCommand> commandCreation, string stepName) where TCommand : ICommand
         {
@@ -55,12 +37,25 @@ namespace EventProcessing.Core.CommandCreation
 
         }
 
-        public IList<Tuple<string,ICommand>> Get(FlowContext context, IList<Type> commands, string stepName)
+        public Tuple<string, ICommand> Get(FlowContext flowEvent, EventToCommand eventToCommand)
+        {
+            if (!commandCreationDictionary.ContainsKey(eventToCommand.Command))
+                throw new ArgumentException("Command:{0} not registered", eventToCommand.Command.FullName);
+
+            var commandsOfType = commandCreationDictionary[eventToCommand.Command];
+
+            if (!commandsOfType.ContainsKey(eventToCommand.CommandName))
+                throw new ArgumentException("Command:{0} not registered with the expected name", eventToCommand.CommandName);
+
+            return new Tuple<string, ICommand>(eventToCommand.CommandName, commandsOfType[eventToCommand.CommandName].Invoke(flowEvent));
+        }
+
+        public IList<Tuple<string,ICommand>> Get(FlowContext flowEvent, IEnumerable<EventToCommand> eventToCommands)
         {
             List<Tuple<string, ICommand>> commandInstances = new List<Tuple<string, ICommand>>();
-            foreach (var command in commands)
+            foreach (var eventToCommand in eventToCommands)
             {
-                commandInstances.AddRange(Get(context, command, stepName));
+                commandInstances.Add(Get(flowEvent, eventToCommand));
             }
             return commandInstances;
         }

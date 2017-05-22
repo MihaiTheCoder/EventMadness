@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 namespace EventProcessing.Core.Attributes
 {
     [System.AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
-    public sealed class LinkEventToCommandAttribute : Attribute
+    public sealed class LinkEventToCommandAttribute : Attribute, EventToCommand
     {
         static Type flowEventType = typeof(FlowEvent);
         static Type commandInterface = typeof(ICommand);
-        string sourceStep;
-        string actualStep;
-        public LinkEventToCommandAttribute(Type flowEvent, Type command, string sourceStep = null, string actualStep = null)
+        
+       
+        public LinkEventToCommandAttribute(Type flowEvent, Type command, string sourceEventCommandName = null, string commandName = null)
         {
             FlowEvent = flowEvent;
             Command = command;
@@ -24,8 +24,8 @@ namespace EventProcessing.Core.Attributes
 
             if (!Command.ImplementsInterface(commandInterface))
                 throw new ArgumentException(string.Format("Class {0} must implement {1}", command.FullName, commandInterface.FullName));
-            this.sourceStep = sourceStep;
-            this.actualStep = actualStep;
+            SourceEventCommandName = sourceEventCommandName;
+            CommandName = commandName;
         }
 
         public Type FlowEvent { get; private set; }
@@ -34,5 +34,9 @@ namespace EventProcessing.Core.Attributes
 
         // This is a named argument
         public string FlowIdentifier { get; set; }
+
+        public string SourceEventCommandName { get; set; }
+
+        public string CommandName { get; set; }
     }
 }

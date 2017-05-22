@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reactive.Linq;
+using System.Linq;
 
 namespace EventProcessing.Core.FlowExecutors
 {
@@ -13,13 +14,13 @@ namespace EventProcessing.Core.FlowExecutors
     {
         IEventStore eventStore;
         Type flowClass;
-        IDictionary<Type, List<Type>> eventToCommandMapping;
+        IDictionary<Type, List<EventToCommand>> eventToCommandMapping;
         ICommandRegister commandFactory;
         public AttributeBasedFlowExecutor(Type flowClass, IEventStore eventStore, ICommandRegister commandFactory)
         {
             this.eventStore = eventStore;
             this.flowClass = flowClass;
-            eventToCommandMapping = new Dictionary<Type, List<Type>>();
+            eventToCommandMapping = new Dictionary<Type, List<EventToCommand>>();
             this.commandFactory = commandFactory;
             eventStore.SubscribeToAllEvents().Subscribe(OnEventRaised);
         }
@@ -29,7 +30,7 @@ namespace EventProcessing.Core.FlowExecutors
             if (flowEvent == null)
                 return;
 
-            IList<Tuple<string,ICommand>> commands = GetCommands(flowEvent);
+            IList<Tuple<string, ICommand>> commands = GetCommands(flowEvent);
             foreach (var command in commands)
             {
                 if (!(flowEvent is CommandProcessingEvent))
@@ -53,7 +54,7 @@ namespace EventProcessing.Core.FlowExecutors
                     if (currentEvent.ContextOfEvent == null)
                         currentEvent.ContextOfEvent = flowEvent.ContextOfEvent;
 
-                    if (currentEvent.StepName == null && stepName != null)
+                    if (currentEvent.StepName == null && stepName != "")
                         currentEvent.StepName = stepName;
 
                     eventStore.AddEvent(currentEvent);
@@ -77,7 +78,18 @@ namespace EventProcessing.Core.FlowExecutors
             var eventType = flowEvent.GetType();
             if (eventToCommandMapping.ContainsKey(eventType))
             {
-                return commandFactory.Get(flowEvent.ContextOfEvent, eventToCommandMapping[eventType], flowEvent.StepName);
+                IEnumerable<EventToCommand> filteredEventToCommands;
+                if(flowEvent.StepName != "")
+                {
+                    filteredEventToCommands = eventToCommandMapping[eventType]
+                        .Where(ec => ec.SourceEventCommandName == "" || ec.SourceEventCommandName == flowEvent.StepName);
+                }
+                else
+                {
+                    filteredEventToCommands = eventToCommandMapping[eventType]
+                        .Where(ec => ec.SourceEventCommandName == "");
+                }
+                return commandFactory.Get(flowEvent.ContextOfEvent, filteredEventToCommands);
             }
             else
             {
@@ -89,9 +101,9 @@ namespace EventProcessing.Core.FlowExecutors
         private void AddEventMapping(LinkEventToCommandAttribute link)
         {
             if (eventToCommandMapping.ContainsKey(link.FlowEvent))
-                eventToCommandMapping[link.FlowEvent].Add(link.Command);
+                eventToCommandMapping[link.FlowEvent].Add(link);
             else
-                eventToCommandMapping.Add(link.FlowEvent, new List<Type>() { link.Command });
+                eventToCommandMapping.Add(link.FlowEvent, new List<EventToCommand> { link });
         }
     }
 }

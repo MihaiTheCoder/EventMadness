@@ -1,4 +1,5 @@
-﻿using EventProcessing.Core.EventStore;
+﻿using EventProcessing.Core.Attributes;
+using EventProcessing.Core.EventStore;
 using System;
 using System.Collections.Generic;
 
@@ -8,8 +9,8 @@ namespace EventProcessing.Core.CommandCreation
     {
         void RegisterCommand<TCommand>(Func<FlowContext,TCommand> commandCreation, string stepName = "") where TCommand : ICommand;
 
-        IList<Tuple<string, ICommand>> Get(FlowContext context, Type commandType, string stepName);
+        Tuple<string, ICommand> Get(FlowContext flwoContext, EventToCommand eventToCommand);
 
-        IList<Tuple<string, ICommand>> Get(FlowContext context, IList<Type> commands, string stepName);
+        IList<Tuple<string, ICommand>> Get(FlowContext flwoContext, IEnumerable<EventToCommand> eventToCommand);
     }
 }

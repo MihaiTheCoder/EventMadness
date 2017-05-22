@@ -9,8 +9,8 @@ using System;
 
 namespace WorkflowApp.SimpleWorkflow
 {
-    [LinkEventToCommand(typeof(OnStart), typeof(GenerateMessage), actualStep: "Le start context")]
-    [LinkEventToCommand(typeof(OnMessageGenerated), typeof(PrintGeneratedMessage), sourceStep:"El ciupacapra")]
+    [LinkEventToCommand(typeof(OnStart), typeof(GenerateMessage), commandName: "Le start context")]
+    [LinkEventToCommand(typeof(OnMessageGenerated), typeof(PrintGeneratedMessage), sourceEventCommandName:"El ciupacapra")]
     public class SimpleFlow : AttributeFlowTemplate
     {
         public SimpleFlow(IEventStore eventStore) : base(eventStore)
@@ -22,7 +22,7 @@ namespace WorkflowApp.SimpleWorkflow
 
         protected override void RegisterCommands()
         {
-            commandFactory.RegisterCommand(context => new GenerateMessage());
+            commandFactory.RegisterCommand(context => new GenerateMessage(), stepName: "Le start context");
             commandFactory.RegisterCommand(context => new PrintGeneratedMessage(Get<OnMessageGenerated>(context).GeneratedMessage));
         }
     }
