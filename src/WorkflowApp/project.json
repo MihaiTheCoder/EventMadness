@@ -10,7 +10,8 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "SimpleInjector": "3.3.1"
+    "SimpleInjector": "3.3.1",
+    "System.ComponentModel.Primitives": "4.1.0"
   },
 
   "frameworks": {
