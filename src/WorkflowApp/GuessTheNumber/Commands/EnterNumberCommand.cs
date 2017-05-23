@@ -8,7 +8,7 @@ using WorkflowApp.GuessTheNumber.Events;
 namespace WorkflowApp.GuessTheNumber.Commands
 {
     [MayRaise(typeof(OnNumberEntered))]
-    public class EnterNumberComponent : SingleEventCommand
+    public class EnterNumber : SingleEventCommand
     {
         public override FlowEvent SingleReturnExecute()
         {

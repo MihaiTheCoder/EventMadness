@@ -9,10 +9,10 @@ namespace WorkflowApp.GuessTheNumber.Commands
 {
 
     [MayRaise(typeof(OnMistakePrinted), ExtraMessage = ErrorMessage)]
-    internal class PrintNotANumberCommand : InvalidValueCommand
+    internal class PrintNotANumber : InvalidValueCommand
     {
         public const string ErrorMessage = "{0} is not a number";
-        public PrintNotANumberCommand(string valueEntered) : 
+        public PrintNotANumber(string valueEntered) : 
             base(string.Format(ErrorMessage, valueEntered))
         {
         }
