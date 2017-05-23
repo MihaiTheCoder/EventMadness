@@ -13,7 +13,7 @@ namespace EventProcessing.Core.CommandCreation
     public class CommandRegister : ICommandRegister
     {
         private IEventStore eventStore;
-        const string defaultStepName = "";
+        const string defaultCommandName = "";
         IDictionary<Type, Dictionary<string, Func<FlowContext, ICommand>>> commandCreationDictionary;
 
         public CommandRegister(IEventStore eventStore)
@@ -22,17 +22,17 @@ namespace EventProcessing.Core.CommandCreation
             commandCreationDictionary = new Dictionary<Type, Dictionary<string, Func<FlowContext, ICommand>>>();
         }        
 
-        public void RegisterCommand<TCommand>(Func<FlowContext, TCommand> commandCreation, string stepName) where TCommand : ICommand
+        public void RegisterCommand<TCommand>(Func<FlowContext, TCommand> commandCreation, string commandName) where TCommand : ICommand
         {
             var commandType = typeof(TCommand);
             if (commandCreationDictionary.ContainsKey(commandType))
             {
-                commandCreationDictionary[commandType].Add(stepName, (context) => commandCreation(context));
+                commandCreationDictionary[commandType].Add(commandName, (context) => commandCreation(context));
             }
             else
             {
                 commandCreationDictionary.Add(typeof(TCommand), new Dictionary<string, Func<FlowContext, ICommand>>
-                    { { stepName, (context) => commandCreation(context) } });
+                    { { commandName, (context) => commandCreation(context) } });
             }
 
         }

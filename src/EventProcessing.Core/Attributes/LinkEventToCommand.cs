@@ -14,7 +14,7 @@ namespace EventProcessing.Core.Attributes
         static Type commandInterface = typeof(ICommand);
         
        
-        public LinkEventToCommandAttribute(Type flowEvent, Type command, string sourceEventCommandName = null, string commandName = null)
+        public LinkEventToCommandAttribute(Type flowEvent, Type command, string sourceEventCommandName = "", string commandName = "")
         {
             FlowEvent = flowEvent;
             Command = command;

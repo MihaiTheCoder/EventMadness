@@ -4,17 +4,17 @@
     {
         public FlowContext ContextOfEvent { get; set; }
 
-        private string stepName;
+        private string commandName;
 
-        public string StepName
+        public string CommandName
         {
             get
             {
-                if (stepName == null)
-                    stepName = "";
-                return stepName;
+                if (commandName == null)
+                    commandName = "";
+                return commandName;
             }
-            set { stepName = value; }
+            set { commandName = value; }
         }
 
     }

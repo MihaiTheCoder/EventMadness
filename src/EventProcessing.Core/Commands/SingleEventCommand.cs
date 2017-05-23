@@ -14,7 +14,9 @@ namespace EventProcessing.Core.Commands
 
         public IObservable<FlowEvent> Execute()
         {            
-            return Observable.Return(SingleReturnExecute());
+            var observable = Observable.Return(SingleReturnExecute());
+            
+            return observable;
         }
     }
 }

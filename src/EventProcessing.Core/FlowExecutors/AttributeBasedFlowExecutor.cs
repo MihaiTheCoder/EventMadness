@@ -16,6 +16,7 @@ namespace EventProcessing.Core.FlowExecutors
         Type flowClass;
         IDictionary<Type, List<EventToCommand>> eventToCommandMapping;
         ICommandRegister commandFactory;
+        const string DEFAULT_COMMAND_NAME = "";
         public AttributeBasedFlowExecutor(Type flowClass, IEventStore eventStore, ICommandRegister commandFactory)
         {
             this.eventStore = eventStore;
@@ -36,7 +37,7 @@ namespace EventProcessing.Core.FlowExecutors
                 if (!(flowEvent is CommandProcessingEvent))
                     eventStore.AddEvent(new OnStartProcessingCommand(flowEvent.ContextOfEvent, command.Item2));
 
-                var events = command.Item2.Execute();
+                var observableEvents = command.Item2.Execute();
 
                 Action onComplete = () =>
                 {
@@ -44,9 +45,11 @@ namespace EventProcessing.Core.FlowExecutors
                         eventStore.AddEvent(new OnEndProcessingCommand(flowEvent.ContextOfEvent, command.Item2));
                 };
 
-                string stepName = command.Item1;// This is needed to capture variable also, we should use command variable in this lambda
+                observableEvents.IgnoreElements().Subscribe((e) => { }, onComplete);
 
-                events.Subscribe(currentEvent =>
+                string commandName = command.Item1;// This is needed to capture variable also, we should use command variable in this lambda
+                
+                observableEvents.Subscribe(currentEvent =>
                 {
                     if (currentEvent == null)
                         return;
@@ -54,11 +57,11 @@ namespace EventProcessing.Core.FlowExecutors
                     if (currentEvent.ContextOfEvent == null)
                         currentEvent.ContextOfEvent = flowEvent.ContextOfEvent;
 
-                    if (currentEvent.StepName == null && stepName != "")
-                        currentEvent.StepName = stepName;
+                    if (currentEvent.CommandName == DEFAULT_COMMAND_NAME && commandName != DEFAULT_COMMAND_NAME)
+                        currentEvent.CommandName = commandName;
 
                     eventStore.AddEvent(currentEvent);
-                }, ex => Console.WriteLine(ex), onComplete);
+                }, ex => Console.WriteLine(ex));
             }
         }
 
@@ -79,15 +82,15 @@ namespace EventProcessing.Core.FlowExecutors
             if (eventToCommandMapping.ContainsKey(eventType))
             {
                 IEnumerable<EventToCommand> filteredEventToCommands;
-                if(flowEvent.StepName != "")
+                if(flowEvent.CommandName != DEFAULT_COMMAND_NAME)
                 {
                     filteredEventToCommands = eventToCommandMapping[eventType]
-                        .Where(ec => ec.SourceEventCommandName == "" || ec.SourceEventCommandName == flowEvent.StepName);
+                        .Where(ec => ec.SourceEventCommandName == DEFAULT_COMMAND_NAME || ec.SourceEventCommandName == flowEvent.CommandName);
                 }
                 else
                 {
                     filteredEventToCommands = eventToCommandMapping[eventType]
-                        .Where(ec => ec.SourceEventCommandName == "");
+                        .Where(ec => ec.SourceEventCommandName == DEFAULT_COMMAND_NAME);
                 }
                 return commandFactory.Get(flowEvent.ContextOfEvent, filteredEventToCommands);
             }

@@ -7,7 +7,7 @@ namespace EventProcessing.Core.CommandCreation
 {
     public interface ICommandRegister
     {
-        void RegisterCommand<TCommand>(Func<FlowContext,TCommand> commandCreation, string stepName = "") where TCommand : ICommand;
+        void RegisterCommand<TCommand>(Func<FlowContext,TCommand> commandCreation, string commandName = "") where TCommand : ICommand;
 
         Tuple<string, ICommand> Get(FlowContext flwoContext, EventToCommand eventToCommand);
 
