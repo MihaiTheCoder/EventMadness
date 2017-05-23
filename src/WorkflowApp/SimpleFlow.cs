@@ -40,16 +40,16 @@ namespace WorkflowApp.SimpleWorkflow
     public class OnMessagePrinted : FlowEvent { }
 
     [MayRaise(typeof(OnMessageGenerated))]
-    public class GenerateMessage : SingleEventCommand
+    public class GenerateMessage : SingleEventCommand<OnMessageGenerated>
     {
-        public override FlowEvent SingleReturnExecute()
+        public override OnMessageGenerated SingleReturnExecute()
         {
             return new OnMessageGenerated("First message");
         }
     }
 
     [MayRaise(typeof(OnMessageGenerated))]
-    public class PrintGeneratedMessage : SingleEventCommand
+    public class PrintGeneratedMessage : SingleEventCommand<OnMessagePrinted>
     {
         string generatedMessage;
         public PrintGeneratedMessage(string generatedMessage)
@@ -57,7 +57,7 @@ namespace WorkflowApp.SimpleWorkflow
             this.generatedMessage = generatedMessage;
         }
 
-        public override FlowEvent SingleReturnExecute()
+        public override OnMessagePrinted SingleReturnExecute()
         {
             Console.WriteLine(generatedMessage);
             return new OnMessagePrinted();

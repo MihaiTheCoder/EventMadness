@@ -36,7 +36,7 @@ namespace WorkflowApp.GuessTheNumber.Commands
         }
     }
 
-    public abstract class InvalidValueCommand : SingleEventCommand
+    public abstract class InvalidValueCommand : SingleEventCommand<OnMistakePrinted>
     {
         string messageToPrint;
 
@@ -45,7 +45,7 @@ namespace WorkflowApp.GuessTheNumber.Commands
             this.messageToPrint = messageToPrint;
         }
 
-        public override FlowEvent SingleReturnExecute()
+        public override OnMistakePrinted SingleReturnExecute()
         {
             Console.WriteLine(messageToPrint);
             return new OnMistakePrinted();

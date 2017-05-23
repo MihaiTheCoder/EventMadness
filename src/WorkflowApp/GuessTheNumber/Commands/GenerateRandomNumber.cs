@@ -8,13 +8,13 @@ using WorkflowApp.GuessTheNumber.Events;
 namespace WorkflowApp.GuessTheNumber.Commands
 {
     [MayRaise(typeof(OnRandomNumberGenerated))]
-    public class GenerateRandomNumber : SingleEventCommand
+    public class GenerateRandomNumber : SingleEventCommand<OnRandomNumberGenerated>
     {
         public GenerateRandomNumber()
         {
         }
 
-        public override FlowEvent SingleReturnExecute()
+        public override OnRandomNumberGenerated SingleReturnExecute()
         {
             Random r = new Random();
             int randomNumber = r.Next(100);

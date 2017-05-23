@@ -2,7 +2,7 @@
 
 namespace WorkflowApp
 {
-    internal class OnNumberRangePrinted : FlowEvent
+    public class OnNumberRangePrinted : FlowEvent
     {
     }
 }

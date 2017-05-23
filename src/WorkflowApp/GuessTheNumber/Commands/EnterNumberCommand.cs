@@ -8,9 +8,9 @@ using WorkflowApp.GuessTheNumber.Events;
 namespace WorkflowApp.GuessTheNumber.Commands
 {
     [MayRaise(typeof(OnNumberEntered))]
-    public class EnterNumber : SingleEventCommand
+    public class EnterNumber : SingleEventCommand<OnNumberEntered>
     {
-        public override FlowEvent SingleReturnExecute()
+        public override OnNumberEntered SingleReturnExecute()
         {
             Console.Write("Guess the number:");
             string valueEntered = Console.ReadLine();
