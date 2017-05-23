@@ -81,17 +81,7 @@ namespace EventProcessing.Core.FlowExecutors
             var eventType = flowEvent.GetType();
             if (eventToCommandMapping.ContainsKey(eventType))
             {
-                IEnumerable<EventToCommand> filteredEventToCommands;
-                if(flowEvent.CommandName != DEFAULT_COMMAND_NAME)
-                {
-                    filteredEventToCommands = eventToCommandMapping[eventType]
-                        .Where(ec => ec.SourceEventCommandName == DEFAULT_COMMAND_NAME || ec.SourceEventCommandName == flowEvent.CommandName);
-                }
-                else
-                {
-                    filteredEventToCommands = eventToCommandMapping[eventType]
-                        .Where(ec => ec.SourceEventCommandName == DEFAULT_COMMAND_NAME);
-                }
+                IEnumerable<EventToCommand> filteredEventToCommands = GetFilteredEvents(flowEvent.CommandName, eventType);
                 return commandFactory.Get(flowEvent.ContextOfEvent, filteredEventToCommands);
             }
             else
@@ -100,6 +90,22 @@ namespace EventProcessing.Core.FlowExecutors
             }
         }
 
+        private IEnumerable<EventToCommand> GetFilteredEvents(string commandName, Type eventType)
+        {
+            IEnumerable<EventToCommand> filteredEventToCommands;
+            if (commandName != DEFAULT_COMMAND_NAME)
+            {
+                filteredEventToCommands = eventToCommandMapping[eventType]
+                    .Where(ec => ec.SourceEventCommandName == DEFAULT_COMMAND_NAME || ec.SourceEventCommandName == commandName);
+            }
+            else
+            {
+                filteredEventToCommands = eventToCommandMapping[eventType]
+                    .Where(ec => ec.SourceEventCommandName == DEFAULT_COMMAND_NAME);
+            }
+
+            return filteredEventToCommands;
+        }
 
         private void AddEventMapping(LinkEventToCommandAttribute link)
         {
