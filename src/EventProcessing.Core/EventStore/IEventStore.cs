@@ -8,13 +8,13 @@ namespace EventProcessing.Core.EventStore
     {
         void AddEvent(FlowEvent flowEvent);
 
-        FlowEvent GetLatestEvent(FlowContext context, Type flowEventType);
+        FlowEvent GetLatestEvent(FlowContext context, Type flowEventType, string commandName = "");
 
-        TEvent GetLatestEvent<TEvent>(FlowContext context) where TEvent : FlowEvent;
+        TEvent GetLatestEvent<TEvent>(FlowContext flowContext, string commandName = "") where TEvent : FlowEvent;
 
-        IObservable<TEvent> Subscribe<TEvent>(FlowContext context) where TEvent : FlowEvent;
+        IObservable<TEvent> Subscribe<TEvent>(FlowContext context, string commandName = "") where TEvent : FlowEvent;
 
-        IObservable<FlowEvent> Subscribe(FlowContext context, Type flowEventType);
+        IObservable<FlowEvent> Subscribe(FlowContext context, Type flowEventType, string commandName = "");
 
         IObservable<FlowEvent> SubscribeToAllEvents();
 
@@ -23,5 +23,6 @@ namespace EventProcessing.Core.EventStore
         IList<FlowEvent> GetCurrentEvents(FlowContext context, Type flowEventType);
 
         IEventRaiserFactory GetEventRaiserFactory();
+
     }
 }

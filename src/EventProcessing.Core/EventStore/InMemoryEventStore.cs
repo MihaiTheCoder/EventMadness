@@ -10,6 +10,7 @@ namespace EventProcessing.Core.EventStore
 {
     public class InMemoryEventStore : IEventStore
     {
+        const string DEFAULT_COMMAND_NAME = "";
         ConcurrentDictionary<FlowContext, ReplaySubject<FlowEvent>> flowEvents;
         BehaviorSubject<FlowEvent> allFlowEventsObservable;
 
@@ -37,7 +38,7 @@ namespace EventProcessing.Core.EventStore
 
         public IList<FlowEvent> GetCurrentEvents(FlowContext context, Type flowEventType)
         {
-            var events = Subscribe(context, flowEventType);
+            var events = Subscribe(context, flowEventType, DEFAULT_COMMAND_NAME);
             
             List<FlowEvent> eventList = new List<FlowEvent>();
             events.Subscribe(e => eventList.Add(e));
@@ -50,9 +51,9 @@ namespace EventProcessing.Core.EventStore
             return new EventRaiserFactory(this);
         }
 
-        public FlowEvent GetLatestEvent(FlowContext context, Type flowEventType)
+        public FlowEvent GetLatestEvent(FlowContext context, Type flowEventType, string commandName = DEFAULT_COMMAND_NAME)
         {
-            var events = Subscribe(context, flowEventType);
+            var events = Subscribe(context, flowEventType, commandName);
 
             var latestEvent = events.Latest().FirstOrDefault();
 
@@ -62,7 +63,7 @@ namespace EventProcessing.Core.EventStore
             var currentContext = context.ParentContext;
             while (currentContext != null)
             {
-                latestEvent = Subscribe(currentContext, flowEventType).Latest().FirstOrDefault();
+                latestEvent = Subscribe(currentContext, flowEventType, commandName).Latest().FirstOrDefault();
 
                 if (latestEvent == null)
                     currentContext = currentContext.ParentContext;
@@ -75,17 +76,17 @@ namespace EventProcessing.Core.EventStore
 
         }
 
-        public TEvent GetLatestEvent<TEvent>(FlowContext context) where TEvent : FlowEvent
+        public TEvent GetLatestEvent<TEvent>(FlowContext context, string commandName = DEFAULT_COMMAND_NAME) where TEvent : FlowEvent
         {
-            return (TEvent)GetLatestEvent(context, typeof(TEvent));
+            return (TEvent)GetLatestEvent(context, typeof(TEvent), commandName);
         }
 
-        public IObservable<FlowEvent> Subscribe(FlowContext context, Type flowEventType)
+        public IObservable<FlowEvent> Subscribe(FlowContext context, Type flowEventType, string commandName = DEFAULT_COMMAND_NAME)
         {
             ReplaySubject<FlowEvent> events;
             if (flowEvents.TryGetValue(context, out events))
             {
-                return events.Where(e => e.ContextOfEvent == context && e.IsSameOrChildOf(flowEventType));
+                return events.Where(e => e.ContextOfEvent == context && e.IsSameOrChildOf(flowEventType) &&( e.CommandName == commandName || e.CommandName == DEFAULT_COMMAND_NAME));
             }
             else
             {
@@ -119,14 +120,16 @@ namespace EventProcessing.Core.EventStore
             }
         }
 
-        public IObservable<TEvent> Subscribe<TEvent>(FlowContext context) where TEvent : FlowEvent
+        public IObservable<TEvent> Subscribe<TEvent>(FlowContext context, string commandName = DEFAULT_COMMAND_NAME) where TEvent : FlowEvent
         {
-            return Subscribe(context, typeof(TEvent)).Select(e => (TEvent)e);
+            return Subscribe(context, typeof(TEvent), commandName).Select(e => (TEvent)e);
         }
 
         public IList<TEvent> GetCurrentEvents<TEvent>(FlowContext context) where TEvent : FlowEvent
         {
             return GetCurrentEvents(context, typeof(TEvent)).Select(e => (TEvent)e).ToList();
         }
+
+        
     }
 }

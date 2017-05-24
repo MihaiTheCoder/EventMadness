@@ -43,6 +43,12 @@ namespace EventProcessing.Core.FlowExecutors
             return eventStore.GetLatestEvent<TEvent>(flowContext);
         }
 
+
+        protected TEvent Get<TEvent>(FlowContext flowContext, string commandName) where TEvent : FlowEvent
+        {
+            return eventStore.GetLatestEvent<TEvent>(flowContext, commandName);
+        }
+
         protected int GetCount<TEvent>(FlowContext flowContext) where TEvent : FlowEvent
         {
             return eventStore.GetCurrentEvents<TEvent>(flowContext).Count;
