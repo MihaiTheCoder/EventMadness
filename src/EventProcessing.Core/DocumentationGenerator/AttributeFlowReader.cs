@@ -29,27 +29,40 @@ namespace EventProcessing.Core.DocumentationGenerator
 
             FlatFlow flatFlow = new FlatFlow();
 
-            var events = links
-                .Select(l => new EventDescription(l.FlowEvent, l.SourceEventCommandName))
-                .Distinct();
+            
+            var commands = links                
+                .ToDictionary(link => link, l => new CommandDescription(l.Command, l.CommandName));
 
-            foreach (var eventFlow in events)
+            var distinctCommands = commands
+                .GroupBy(e => new { e.Value.Command, e.Value.CommandName })
+                .Select(g => g.First().Value);
+
+
+            var events = links                
+                .ToDictionary(link => link, link => new EventDescription(link.FlowEvent, link.SourceEventCommandName));
+
+            var distinctEvents = events
+                .GroupBy(e => new { e.Value.FlowEvent, e.Value.SourceCommandName })
+                .Select(g => g.First().Value);
+
+
+            foreach (var eventFlow in distinctEvents)
             {
                 var commandsLinkedToEvent = links
-                    .Where(l => l.FlowEvent == eventFlow.FlowEvent && l.SourceEventCommandName == eventFlow.SourceCommandName)
-                    .Select(l => new CommandDescription(l.Command, l.CommandName))
+                    .Where(link => link.FlowEvent == eventFlow.FlowEvent && link.SourceEventCommandName == eventFlow.SourceCommandName)
+                    .Select(link => commands[link])
                     .ToList();
-                flatFlow.EventToCommands.Add(new EventDescription(eventFlow.FlowEvent, eventFlow.SourceCommandName), commandsLinkedToEvent);
-            }
 
-            var commands = links.Select(l => new CommandDescription(l.Command, l.CommandName)).Distinct();
+                flatFlow.EventToCommands.Add(eventFlow, commandsLinkedToEvent);
+            }            
 
-            foreach (var command in commands)
+            foreach (var command in distinctCommands)
             {
                 var eventsThatCommandMayRaise = command.Command.GetTypeInfo().GetCustomAttributes<MayRaiseAttribute>().ToList();
 
                 flatFlow.CommandToEvents.Add(command, eventsThatCommandMayRaise);
             }
+
             return flatFlow;
         }
     }
@@ -84,6 +97,7 @@ namespace EventProcessing.Core.DocumentationGenerator
             foreach (var flowEvent in restOfTheEvents)
             {
                 IEnumerable<SourceOfEvent> sourcesOfEvents;
+                
                 sourcesOfEvents = GetSourceOfEvents(flatFlow, flowEvent, everyEventHasAnIssuer);
 
                 foreach (var sourceOfEvent in sourcesOfEvents)
@@ -95,11 +109,14 @@ namespace EventProcessing.Core.DocumentationGenerator
             return allTransitions;
         }
 
-        private static IEnumerable<SourceOfEvent> GetSourceOfEvents(FlatFlow flatFlow, EventDescription flowEvent, bool everyEventHasAnIssuer)
+        private static IEnumerable<SourceOfEvent> GetSourceOfEvents(
+            FlatFlow flatFlow, 
+            EventDescription flowEvent, 
+            bool everyEventHasAnIssuer)
         {
             IEnumerable<SourceOfEvent> commands = commands = flatFlow.CommandToEvents
                 .Where(c => c.Value.Any(mayRaise => mayRaise.EventThatMayBeRaised == flowEvent.FlowEvent))
-                .Select(c => new SourceOfEvent(c.Key, c.Value.First(mayRaise => mayRaise.EventThatMayBeRaised == flowEvent.FlowEvent).Condition));                
+                .Select(c => new SourceOfEvent(c.Key, c.Value.First(mayRaise => mayRaise.EventThatMayBeRaised == flowEvent.FlowEvent)));                
 
             if (everyEventHasAnIssuer && !commands.Any())
                 throw new InvalidProgramException($"There is no command attached to event:{flowEvent}");
@@ -118,34 +135,26 @@ namespace EventProcessing.Core.DocumentationGenerator
 
             return transitions;
         }
-
-        private static void NewMethod(CommandDescription commandDescription, List<Transition> transitions, KeyValuePair<EventDescription, List<CommandDescription>> startEvent)
-        {
-            
-        }
-    }
-
-    public class Node
-    {
-        public string Name { get; set; }        
-
-        public Node(string name)
-        {
-            Name = name;
-        }
     }
 
     public class SourceOfEvent
     {
-        public SourceOfEvent(CommandDescription command, string conditionOfRaise)
+        public SourceOfEvent(CommandDescription command, MayRaiseAttribute mayRaiseAttribute)
         {
             Command = command;
-            ConditionOfRaise = conditionOfRaise;
+
+            if (mayRaiseAttribute != null)
+            {
+                ConditionOfRaise = mayRaiseAttribute.Condition;
+                ExtraMessage = mayRaiseAttribute.ExtraMessage;
+            }
         }
 
         public CommandDescription Command { get; set; }
 
         public string ConditionOfRaise { get; set; }
+
+        public string ExtraMessage { get; set; }
     }
 
     public class Transition
@@ -165,6 +174,11 @@ namespace EventProcessing.Core.DocumentationGenerator
         public CommandDescription TargetCommand { get; set; }
 
         public string ConditionForTransition { get; set; }
+
+        public override string ToString()
+        {
+            return $"Source:{SourceCommand}, Target:{TargetCommand}, Transition:{TransitionEvent}";            
+        }
     }
 
     public class CommandDescription
@@ -180,10 +194,19 @@ namespace EventProcessing.Core.DocumentationGenerator
 
         public override string ToString()
         {
-            string name =  "Command: " + Command.Name;
-
-            if (!string.IsNullOrWhiteSpace(CommandName))
-                name += "; name: " + CommandName;
+            string name = "Command: ";
+            if (Command != null && !string.IsNullOrEmpty(CommandName))
+            {
+                name += $"{Command.Name}, name: {CommandName}";
+            }
+            else if (Command != null)
+            {
+                name += $"{Command.Name}";
+            }
+            else if (!string.IsNullOrEmpty(CommandName))
+            {
+                name += $"{CommandName}";
+            }
 
             return name;
         }
