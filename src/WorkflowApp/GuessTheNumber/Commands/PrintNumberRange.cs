@@ -1,9 +1,10 @@
 ﻿using System;
 using EventProcessing.Core.Commands;
-using EventProcessing.Core.EventStore;
+using EventProcessing.Core.Attributes;
 
 namespace WorkflowApp
 {
+    [MayRaise(typeof(OnNumberRangePrinted))]
     public class PrintNumberRange : SingleEventCommand<OnNumberRangePrinted>
     {
         public override OnNumberRangePrinted SingleReturnExecute()

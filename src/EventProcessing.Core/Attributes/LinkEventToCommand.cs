@@ -17,6 +17,7 @@ namespace EventProcessing.Core.Attributes
         public LinkEventToCommandAttribute(Type flowEvent, Type command, string sourceEventCommandName = "", string commandName = "")
         {
             FlowEvent = flowEvent;
+
             Command = command;
 
             if (!FlowEvent.IsSameOrChildOf(flowEventType))
@@ -24,7 +25,9 @@ namespace EventProcessing.Core.Attributes
 
             if (!Command.ImplementsInterface(commandInterface))
                 throw new ArgumentException(string.Format("Class {0} must implement {1}", command.FullName, commandInterface.FullName));
+
             SourceEventCommandName = sourceEventCommandName;
+
             CommandName = commandName;
         }
 
@@ -38,5 +41,10 @@ namespace EventProcessing.Core.Attributes
         public string SourceEventCommandName { get; set; }
 
         public string CommandName { get; set; }
+
+        public override string ToString()
+        {
+            return $"LinkEventToCommand:FlowEvent:{FlowEvent.Name}, Command: {Command.Name}, SourceEventCommandName: {SourceEventCommandName}, CommandName: {CommandName}";            
+        }
     }
 }
